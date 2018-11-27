@@ -60,3 +60,18 @@ body.CarpoolFood{
 .list-group-item{
     margin: 5px 0 5px 0;
 }
+
+.CarpoolObjectContainer{
+    background-color: blue;
+    flex: auto;
+}
+
+.CarpoolObject{
+    background-color: yellowgreen;
+    flex: initial;
+    margin: 10px 5px 10px 5px;
+}
+
+#RequestOrService{
+    overflow-x: auto;
+}

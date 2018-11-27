@@ -1,0 +1,24 @@
+{
+    "activity": {
+        "id": 1,
+        "userId": 3,
+        "restaurant": "a7898asd5f16w",
+        "notes": "Please drop off at my desk, building 7, 9th floor, desk 23",
+        "requestStatus": "Ready",
+        "createdTime": null,
+        "lastModifiedTime": null
+    },
+    "foodOrderNumber": null,
+    "tips": 2,
+    "preferedPickupTime": "2018-12-01 18:00:00",
+    "address": {
+        "id": 1,
+        "address1": "456 Ford Rd",
+        "address2": "Building 7",
+        "city": "Dearborn",
+        "state": "MI",
+        "zipcode": "48888",
+        "country": null
+    },
+    "idDriverService": 0
+}

@@ -1,10 +1,5 @@
 /*globals $:false */
 
-var url = "";
-
-
-
-
 $(document).ready(function () {
     $("#Login").submit(function (event) {
         $.ajax({
