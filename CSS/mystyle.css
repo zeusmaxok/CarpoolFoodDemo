@@ -72,6 +72,10 @@ body.CarpoolFood{
     margin: 10px 5px 10px 5px;
 }
 
-#RequestOrService{
-    overflow-x: auto;
+.modal-dialog{
+    overflow-y: initial;
+}
+.modal-body{
+    height: 400px;
+    overflow-y: auto;
 }

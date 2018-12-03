@@ -4,7 +4,7 @@ var currentUser = JSON.parse(localStorage.getItem("CurrentUser"));
 
 $(document).ready(function () {
 
-    alert(currentUser.LoginName + "PickupUser: " + currentUser.IsPickupUser + ";  DriverUser: " + currentUser.IsDriverUser);
+    alert('Id: ' + currentUser.Id + ';  User: ' + currentUser.LoginName + ";  PickupUser: " + currentUser.IsPickupUser + ";  DriverUser: " + currentUser.IsDriverUser);
 
 
     $(".form-heading span").append(currentUser.LoginName);
@@ -15,16 +15,80 @@ $(document).ready(function () {
     } else if (currentUser.IsDriverUser) {
         $(".list-group").append('<button type="submit" class="btn" id="btn1" data-toggle="modal" data-target="#CarpoolFoodModal">New Driver Service</button><button type="submit" class="btn" id="btn2" data-toggle="modal" data-target="#CarpoolFoodFormModal">Search Pickup Request</button><button type="submit" class="btn" id="btn3">My Driver Services</button>');
 
-    }
+    };
 
     $(".btn").addClass("list-group-item list-group-item-action btn-lg");
 
     var _url = '';
     var _role = '';
 
+
+    $("#btn1").on('click', function () {
+        var buttonText = $(this).text();
+
+        if (buttonText.toLowerCase().indexOf("driver") >= 0) {
+
+            $("#CarpoolFoodModal .modal-title").html("Create New Driver Service");
+            $("#body-content").append(NewRequestOrService("driver"));
+
+        } else if (buttonText.toLowerCase().indexOf("pickup") >= 0) {
+
+            $("#CarpoolFoodModal .modal-title").html("Create New Pickup Request");
+            $("#body-content").append(NewRequestOrService("pickup"));
+
+        }
+
+        $("#createRequest").submit(function (e) {
+            if (buttonText.toLowerCase().indexOf("driver") >= 0) {
+
+                _url = 'http://localhost:50126/newdriverservice';
+                _role = 'driver';
+
+                DriverService.Activity.restaurant = $("#restaurant").val();
+                DriverService.Activity.Notes = $("#note").val();
+                DriverService.Activity.UserId = currentUser.Id;
+                DriverService.DeliveringTimeStart = $("#deliveringTimeStart").val();
+                DriverService.PickupQuantity = $("#pickupQuantity").val();
+                DriverService.Address.Address1 = $("#address1").val();
+                DriverService.Address.Address2 = $("#address2").val();
+                DriverService.Address.City = $("#city").val();
+                DriverService.Address.State = $("#state").val();
+                DriverService.Address.ZipCode = $("#zipcode").val();
+
+                newRequestOrService(_role, _url, DriverService);
+
+            } else if (buttonText.toLowerCase().indexOf("pickup") >= 0) {
+
+                _url = 'http://localhost:50126/newpickuprequest';
+                _role = 'pickup';
+
+                PickupRequest.Activity.Restaurant = $("#restaurant").val();
+                PickupRequest.Activity.Notes = $("#note").val();
+                PickupRequest.Activity.UserId = currentUser.Id;
+                PickupRequest.PreferedPickupTime = $("#PreferedPickupTime").val();
+                PickupRequest.FoodOrderNumber = $("#foodOrder").val();
+                PickupRequest.Tips = $("#tips").val();
+                PickupRequest.Address.Address1 = $("#address1").val();
+                PickupRequest.Address.Address2 = $("#address2").val();
+                PickupRequest.Address.City = $("#city").val();
+                PickupRequest.Address.State = $("#state").val();
+                PickupRequest.Address.ZipCode = $("#zipcode").val();
+
+                newRequestOrService(_role, _url, PickupRequest);
+            }
+
+            return false;
+
+        });
+
+
+    });
+
     $("#btn2").click(function () {
 
-        alert("btn2");
+        //alert("btn2");
+
+        $("#CarpoolFoodFormModal .modal-title").html("New Search");
 
         $("#form-content").append(searchForm());
         if (currentUser.IsPickupUser) {
@@ -42,26 +106,61 @@ $(document).ready(function () {
         $("#searchForm").submit(function (e) {
 
             e.preventDefault();
-            // Coding
-            $('#CarpoolFoodFormModal').modal('toggle'); 
-            getDriversOrPickups(_role, _url);
+
+            $('#CarpoolFoodFormModal').modal('toggle');
+
+            if (currentUser.IsPickupUser) {
+                getDriversOrPickups('driver', 'http://localhost:50126/getdriverservices', 0);
+                getDriversOrPickups('pickup', 'http://localhost:50126/getpickuprequests', currentUser.Id);
+            } else if (currentUser.IsDriverUser) {
+                getDriversOrPickups('pickup', 'http://localhost:50126/getpickuprequests', 0);
+                getDriversOrPickups('driver', 'http://localhost:50126/getdriverservices', currentUser.Id);
+
+            }
+
+            $("#CarpoolFoodModal .modal-title").html("Choose your Service/Request");
             $("#CarpoolFoodModal").modal("show");
+
             return false;
         });
     });
 
-
     $("#btn3").click(function () {
-        alert("btn3");
+        //alert("btn3");
         if (currentUser.IsPickupUser) {
+            
+            _role = 'pickup';
+            _url = 'http://localhost:50126/getpickuprequests';
 
-            getRequestsOrServices("pickup");
+            getDriversOrPickups(_role, _url, currentUser.Id);
+            
+            $("#CarpoolFoodModal .modal-title").html("Your Requests");
+            $("#CarpoolFoodModal").modal("show");
+
+            return false;
 
         } else if (currentUser.IsDriverUser) {
+                  
+            _role = 'driver';
+            _url = 'http://localhost:50126/getdriverservices';
 
-            getRequestsOrServices("driver");
+            getDriversOrPickups(_role, _url, currentUser.Id);
+            
+            $("#CarpoolFoodModal .modal-title").html("Your Services");
+            $("#CarpoolFoodModal").modal("show");
+
+            return false;
 
         }
+    });
+
+    $("#save").click(function () {
+        var requestID = $("input[name='request']:checked").val();
+        var serviceID = $("input[name='service']:checked").val();
+
+        //alert('RequestId: ' + requestID + ';  ServiceId: ' + serviceID);
+
+        placeOrder(requestID, serviceID);
     });
 
     $("#CarpoolFoodModal").on("hidden.bs.modal", function () {
@@ -74,15 +173,66 @@ $(document).ready(function () {
 
 });
 
+function newRequestOrService(role, url, data) {
+    alert(JSON.stringify(data));
+    if (role === 'driver') {
+        $.ajax({
+            type: "POST",
+            url: url,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Accept', 'application/json');
+            },
+            statusCode: {      
+                404: function () {
+                    alert("New Request 404");
+                },
+                400: function () {
+                    alert("Bad Request");
+                }
+            },
+            success: function (data) {
+                alert(data);
+            }
+        });
+    }
 
-function getDriversOrPickups(role, url) {
-    alert("getDriversOrPickups ajax");
+    if (role === 'pickup') {
+        $.ajax({
+            type: "POST",
+            url: url,
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Accept', 'application/json');
+            },
+            statusCode: {              
+                404: function () {
+                    alert("New Request 404");
+                },
+                400: function () {
+                    alert("Bad Request");
+                }
+            },
+            success: function (data) {
+                alert(data);
+            }
+        });
+    }
+}
+
+
+function getDriversOrPickups(role, url, userId) {
+    //alert("getDriversOrPickups ajax");
+
     $.ajax({
         type: "GET",
         url: url,
         data: {
             restaurant: $("#restaurant").val(),
-            status: $("#status").val()
+            status: $("#status").val(),
+            userId: userId
         },
         beforeSend: function (xhr) {
             xhr.setRequestHeader('Accept', 'application/json');
@@ -102,33 +252,65 @@ function getDriversOrPickups(role, url) {
 }
 
 
-
-var examples = [
-    {
-        Restaurant: 'Andy1',
-        FoodOrderNumber: 'asdfasddf',
-        PreferedPickupTime: '1900-01-01 00:00:00.000',
-        Notes: 'haha',
-        Address: {
-            Address1: '123 ABC Ave',
-            Address2: '#307',
-            City: 'Beijing',
-            State: 'Beijing',
-            Zipcode: '100000'
+function placeOrder(requestId, serviceId) {
+    //alert("placeOrder ajax");
+    $.ajax({
+        type: "POST",
+        url: 'http://localhost:50126/plcaerequestorservice',
+        data: {
+            requestID: requestId,
+            serviceID: serviceId
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Accept', 'application/json');
+        },
+        statusCode: {
+            404: function () {
+                alert("User Not Found");
+            },
+            400: function () {
+                alert("Bad Request");
+            }
+        },
+        success: function (data) {
+            alert(data);
         }
+    });
+}
+
+
+
+var PickupRequest = {
+    "Activity": {
+        "UserId": 0,
+        "Restaurant": "",
+        "Notes": ""
     },
-
-    {
-        Restaurant: 'Andy2',
-        FoodOrderNumber: 'asdfasddf2',
-        PreferedPickupTime: '1900-01-01 00:00:00.000',
-        Notes: 'haha2',
-        Address: {
-            Address1: '123 ABC Ave',
-            Address2: '#3072',
-            City: 'Beijing2',
-            State: 'Beijing2',
-            Zipcode: '100002'
-        }
+    "FoodOrderNumber": "",
+    "Tips": 0,
+    "PreferedPickupTime": "",
+    "Address": {
+        "Address1": "",
+        "Address2": "",
+        "City": "",
+        "State": "",
+        "ZipCode": ""
     }
-];
+};
+
+var DriverService = {
+    "Activity": {
+        "UserId": 0,
+        "restaurant": "",
+        "Notes": ""
+    },
+    "PickupQuantity": 0,
+    "DeliveringTimeStart": "",
+    "Address": {
+        "Address1": "",
+        "Address2": "",
+        "City": "",
+        "State": "",
+        "ZipCode": ""
+    }
+};
