@@ -110,11 +110,11 @@ $(document).ready(function () {
             $('#CarpoolFoodFormModal').modal('toggle');
 
             if (currentUser.IsPickupUser) {
-                getDriversOrPickups('driver', 'http://localhost:50126/getdriverservices', 0);
-                getDriversOrPickups('pickup', 'http://localhost:50126/getpickuprequests', currentUser.Id);
+                getDriversOrPickups('driver', 'http://localhost:50126/getdriverservices', 0, 2);
+                getDriversOrPickups('pickup', 'http://localhost:50126/getpickuprequests', currentUser.Id, 3);
             } else if (currentUser.IsDriverUser) {
-                getDriversOrPickups('pickup', 'http://localhost:50126/getpickuprequests', 0);
-                getDriversOrPickups('driver', 'http://localhost:50126/getdriverservices', currentUser.Id);
+                getDriversOrPickups('pickup', 'http://localhost:50126/getpickuprequests', 0, 2);
+                getDriversOrPickups('driver', 'http://localhost:50126/getdriverservices', currentUser.Id, 3);
 
             }
 
@@ -132,7 +132,7 @@ $(document).ready(function () {
             _role = 'pickup';
             _url = 'http://localhost:50126/getpickuprequests';
 
-            getDriversOrPickups(_role, _url, currentUser.Id);
+            getDriversOrPickups(_role, _url, currentUser.Id, 1);
             
             $("#CarpoolFoodModal .modal-title").html("Your Requests");
             $("#CarpoolFoodModal").modal("show");
@@ -144,7 +144,7 @@ $(document).ready(function () {
             _role = 'driver';
             _url = 'http://localhost:50126/getdriverservices';
 
-            getDriversOrPickups(_role, _url, currentUser.Id);
+            getDriversOrPickups(_role, _url, currentUser.Id, 1);
             
             $("#CarpoolFoodModal .modal-title").html("Your Services");
             $("#CarpoolFoodModal").modal("show");
@@ -223,7 +223,7 @@ function newRequestOrService(role, url, data) {
 }
 
 
-function getDriversOrPickups(role, url, userId) {
+function getDriversOrPickups(role, url, userId, caller) {
     //alert("getDriversOrPickups ajax");
 
     $.ajax({
@@ -232,7 +232,8 @@ function getDriversOrPickups(role, url, userId) {
         data: {
             restaurant: $("#restaurant").val(),
             status: $("#status").val(),
-            userId: userId
+            userId: userId,
+            caller: caller
         },
         beforeSend: function (xhr) {
             xhr.setRequestHeader('Accept', 'application/json');

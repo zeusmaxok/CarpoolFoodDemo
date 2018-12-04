@@ -63,7 +63,7 @@ function injectDriverOrService(role, CarpoolObjects) {
 
             var preferedPickupTime = '<div><span>Prefer Pickup At: </span>' + value.preferedPickupTime + '<br></div>';
 
-            var notes = '<div><span>Note: </span>' + value.notes + '</div>';
+            var notes = '<div><span>Note: </span>' + value.activity.notes + '</div>';
 
             var address = '<div><span>Drop-Off At: </span>' + value.address.address1 + '<br>' + value.address.address2 + '<br>' +
                 value.address.city + '<br>' +
