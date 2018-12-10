@@ -3,21 +3,22 @@
 var currentUser = JSON.parse(localStorage.getItem("CurrentUser"));
 
 $(document).ready(function () {
+    
+    signalClient();
 
     alert('Id: ' + currentUser.Id + ';  User: ' + currentUser.LoginName + ";  PickupUser: " + currentUser.IsPickupUser + ";  DriverUser: " + currentUser.IsDriverUser);
-
 
     $(".form-heading span").append(currentUser.LoginName);
 
     if (currentUser.IsPickupUser) {
-        $(".list-group").append('<button type="submit" class="btn" id="btn1" data-toggle="modal" data-target="#CarpoolFoodModal">New Pickup Request</button><button type="submit" class="btn" id="btn2" data-toggle="modal" data-target="#CarpoolFoodFormModal">Search Driver Service</button><button type="submit" class="btn" id="btn3">My Pickup Requests</button>');
+        $(".list-group").append('<button type="submit" class="btn mbtn" id="btn1" data-toggle="modal" data-target="#CarpoolFoodModal">New Pickup Request</button><button type="submit" class="btn mbtn" id="btn2" data-toggle="modal" data-target="#CarpoolFoodFormModal">Search Driver Service</button><button type="submit" class="btn mbtn" id="btn3">My Pickup Requests</button>');
 
     } else if (currentUser.IsDriverUser) {
-        $(".list-group").append('<button type="submit" class="btn" id="btn1" data-toggle="modal" data-target="#CarpoolFoodModal">New Driver Service</button><button type="submit" class="btn" id="btn2" data-toggle="modal" data-target="#CarpoolFoodFormModal">Search Pickup Request</button><button type="submit" class="btn" id="btn3">My Driver Services</button>');
+        $(".list-group").append('<button type="submit" class="btn mbtn" id="btn1" data-toggle="modal" data-target="#CarpoolFoodModal">New Driver Service</button><button type="submit" class="btn mbtn" id="btn2" data-toggle="modal" data-target="#CarpoolFoodFormModal">Search Pickup Request</button><button type="submit" class="btn mbtn" id="btn3">My Driver Services</button>');
 
     };
 
-    $(".btn").addClass("list-group-item list-group-item-action btn-lg");
+    $(".mbtn").addClass("list-group-item list-group-item-action btn-lg");
 
     var _url = '';
     var _role = '';
@@ -174,7 +175,7 @@ $(document).ready(function () {
 });
 
 function newRequestOrService(role, url, data) {
-    alert(JSON.stringify(data));
+    //alert(JSON.stringify(data));
     if (role === 'driver') {
         $.ajax({
             type: "POST",

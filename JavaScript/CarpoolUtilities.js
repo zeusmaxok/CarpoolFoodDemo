@@ -8,9 +8,10 @@ function getRequestsOrServices(role, data) {
 }
 
 function injectDriverOrService(role, CarpoolObjects) {
-    if (role === 'driver') {
+    
+    var objectCard = '';
 
-        var objectCard = '';
+    if (role === 'driver') {
 
         $.each(CarpoolObjects, function (index, value) {
             var disabled = ''
@@ -39,14 +40,12 @@ function injectDriverOrService(role, CarpoolObjects) {
             objectCard = objectCard + '<div class="CarpoolObject">' + activityID + restaurant.concat(serviceStatus, availableSpots, deliveringTimeStart, notes, address) + '</div>';
         });
 
-        objectCard = '<div class="CarpoolObjectContainer"><p>Driver Services</p><form class="form-group" id="RequestOrService">' + objectCard + '<button type="button" id="submitSOR" class="btn btn-primary" data-toggle="modal">Submit</button></form></div>';
+        objectCard = '<div class="CarpoolObjectContainer"><p>Driver Services</p><form class="form-group" id="RequestOrService">' + objectCard + '<button type="button" id="cancelSOR" class="btn btn-primary">Cancel</button></form></div>';
 
-        return objectCard;
+
     }
 
     if (role === 'pickup') {
-
-        var objectCard = '';
 
         $.each(CarpoolObjects, function (index, value) {
             var disabled = ''
@@ -73,10 +72,10 @@ function injectDriverOrService(role, CarpoolObjects) {
             objectCard = objectCard + '<div class="CarpoolObject">' + activityID + restaurant.concat(serviceStatus, preferedPickupTime, notes, address) + '</div>';
         });
 
-        objectCard = '<div class="CarpoolObjectContainer"><p>Pickup Requests</p><form class="form-group" id="RequestOrService">' + objectCard + '<button type="button" id="submitSOR" class="btn btn-primary" data-toggle="modal">Submit</button></form></div>';
-
-        return objectCard;
+        objectCard = '<div class="CarpoolObjectContainer"><p>Pickup Requests</p><form class="form-group" id="RequestOrService">' + objectCard + '<button type="button" id="cancelSOR" class="btn btn-primary">Cancel</button></form></div>';
     }
+
+    return objectCard;
 }
 
 function searchForm() {
@@ -99,7 +98,7 @@ function NewRequestOrService(role) {
     var _formbody = '';
 
     if (role === 'pickup') {
-        
+
         _formbody = '<form id="createRequest">' +
             '<div class="form-group">' +
             '<label>Restaurant</label><br>' +
@@ -128,7 +127,7 @@ function NewRequestOrService(role) {
             '<button type="submit" class="btn btn-primary">Submit</button>' +
             '</form>';
     } else if (role === 'driver') {
-        
+
         _formbody = '<form id="createRequest">' +
             '<div class="form-group">' +
             '<label>Restaurant</label><br>' +
@@ -161,5 +160,5 @@ function NewRequestOrService(role) {
 
 function logout() {
     localStorage.removeItem("CurrentUser");
-    window.location = "../Pages/Login.html";   
+    window.location = "../Pages/Login.html";
 }
