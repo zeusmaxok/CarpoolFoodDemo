@@ -3,8 +3,6 @@
 var currentUser = JSON.parse(localStorage.getItem("CurrentUser"));
 
 $(document).ready(function () {
-    
-    signalClient();
 
     alert('Id: ' + currentUser.Id + ';  User: ' + currentUser.LoginName + ";  PickupUser: " + currentUser.IsPickupUser + ";  DriverUser: " + currentUser.IsDriverUser);
 
@@ -16,7 +14,7 @@ $(document).ready(function () {
     } else if (currentUser.IsDriverUser) {
         $(".list-group").append('<button type="submit" class="btn mbtn" id="btn1" data-toggle="modal" data-target="#CarpoolFoodModal">New Driver Service</button><button type="submit" class="btn mbtn" id="btn2" data-toggle="modal" data-target="#CarpoolFoodFormModal">Search Pickup Request</button><button type="submit" class="btn mbtn" id="btn3">My Driver Services</button>');
 
-    };
+    }
 
     $(".mbtn").addClass("list-group-item list-group-item-action btn-lg");
 
@@ -122,6 +120,8 @@ $(document).ready(function () {
             $("#CarpoolFoodModal .modal-title").html("Choose your Service/Request");
             $("#CarpoolFoodModal").modal("show");
 
+
+
             return false;
         });
     });
@@ -129,24 +129,24 @@ $(document).ready(function () {
     $("#btn3").click(function () {
         //alert("btn3");
         if (currentUser.IsPickupUser) {
-            
+
             _role = 'pickup';
             _url = 'http://localhost:50126/getpickuprequests';
 
             getDriversOrPickups(_role, _url, currentUser.Id, 1);
-            
+
             $("#CarpoolFoodModal .modal-title").html("Your Requests");
             $("#CarpoolFoodModal").modal("show");
 
             return false;
 
         } else if (currentUser.IsDriverUser) {
-                  
+
             _role = 'driver';
             _url = 'http://localhost:50126/getdriverservices';
 
             getDriversOrPickups(_role, _url, currentUser.Id, 1);
-            
+
             $("#CarpoolFoodModal .modal-title").html("Your Services");
             $("#CarpoolFoodModal").modal("show");
 
@@ -163,6 +163,8 @@ $(document).ready(function () {
 
         placeOrder(requestID, serviceID);
     });
+
+
 
     $("#CarpoolFoodModal").on("hidden.bs.modal", function () {
         $("#body-content").html("");
@@ -185,7 +187,7 @@ function newRequestOrService(role, url, data) {
             beforeSend: function (xhr) {
                 xhr.setRequestHeader('Accept', 'application/json');
             },
-            statusCode: {      
+            statusCode: {
                 404: function () {
                     alert("New Request 404");
                 },
@@ -208,7 +210,7 @@ function newRequestOrService(role, url, data) {
             beforeSend: function (xhr) {
                 xhr.setRequestHeader('Accept', 'application/json');
             },
-            statusCode: {              
+            statusCode: {
                 404: function () {
                     alert("New Request 404");
                 },
@@ -249,6 +251,18 @@ function getDriversOrPickups(role, url, userId, caller) {
         },
         success: function (data) {
             getRequestsOrServices(role, data);
+
+            $("#serviceStart").on('click', function () {
+                var serviceID = $("input[name='service']:checked").val();
+                alert("#serviceStart " + serviceID);
+                
+            });
+
+            $("#completeService").on('click', function () {
+                var serviceID = $("input[name='service']:checked").val();
+                alert("#completeService " + serviceID);
+                completeService(serviceID);
+            });
         }
     });
 }
@@ -275,12 +289,39 @@ function placeOrder(requestId, serviceId) {
             }
         },
         success: function (data) {
-            alert(data);
+            alert("Place order success");
         }
     });
 }
 
+function completeService(serviceId) {
+    $.ajax({
+        type: "POST",
+        url: 'http://localhost:50126/completedriverservice',
+        data: {
+            serviceID: serviceId
+        },
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Accept', 'application/json');
+        },
+        statusCode: {
+            404: function () {
+                alert("User Not Found");
+            },
+            400: function () {
+                alert("Bad Request");
+            }
+        },
+        success: function (data) {
 
+            $.each(data, function (index, value) {
+                connection.invoke("SendNotification", value, "Your food is successfully delivered.").catch(function (err) {
+                    return console.error(err.toString());
+                });
+            });
+        }
+    });
+}
 
 var PickupRequest = {
     "Activity": {

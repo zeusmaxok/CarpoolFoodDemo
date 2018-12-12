@@ -40,7 +40,7 @@ function injectDriverOrService(role, CarpoolObjects) {
             objectCard = objectCard + '<div class="CarpoolObject">' + activityID + restaurant.concat(serviceStatus, availableSpots, deliveringTimeStart, notes, address) + '</div>';
         });
 
-        objectCard = '<div class="CarpoolObjectContainer"><p>Driver Services</p><form class="form-group" id="RequestOrService">' + objectCard + '<button type="button" id="cancelSOR" class="btn btn-primary">Cancel</button></form></div>';
+        objectCard = '<div class="CarpoolObjectContainer"><p>Driver Services</p><form class="form-group" id="RequestOrService">' + objectCard + '<button type="button" id="serviceStart" class="btn btn-primary">Start</button><button type="button" id="completeService" class="btn btn-primary">Complete</button><button type="button" id="cancelSOR" class="btn btn-primary">Cancel</button></form></div>';
 
 
     }
